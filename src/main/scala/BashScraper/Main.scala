@@ -13,6 +13,11 @@ import net.liftweb.json.JsonDSL._
 
 import scala.collection.mutable.ListBuffer
 
+/** Provides utility to parse N latest pages from bash.org.pl website,
+  * where N is given as a parameter during invocation from command line.
+  *
+  * Output file is configurable in config file resources/resources.conf
+  */
 package BashScraper {}
 
 object Main extends App {
@@ -48,11 +53,24 @@ object Main extends App {
   })
   pw.close()
 
+  /** Retrieves the number of the oldest page.
+    *
+    * The method is used when validating input parameter, so that the program won't have to parse entire history
+    * before throwing an exception
+    *
+    * @return number of oldest page as Int
+    */
   def getHighestPageAvailable(): Int = {
     val pagesAvailable = browser.get("http://bash.org.pl/latest/") >> elementList(".page")
     pagesAvailable.maxBy(_.text).text.toInt
   }
 
+  /** Retrieves all posts from a given Document and passes each to parsePost function.
+    * Additionally, measures the time it takes for the program to parse a single post
+    * and appends it to postParseTimes ListBuffer for later calculations.
+    *
+    * @param document of Document type which is a single web page
+    */
   def parsePage(document: Document): Unit = {
     val posts = document >> elementList(".q.post")
     for (post <- posts) {
@@ -60,6 +78,12 @@ object Main extends App {
     }
   }
 
+  /** Creates a JObject from a single post and appends it to the output ListBuffer.
+    * Parses the post using CSS selectors.
+    * With each post parsed, increments the postCounter by 1.
+    *
+    * @param post which is a single Element type to be parsed
+    */
   def parsePost(post: Element): Unit = {
     val id = post.attr("id").substring(1)
     val score = (post >> element(".points")).text
@@ -68,7 +92,12 @@ object Main extends App {
     postCounter += 1
     output += json
   }
-
+  /** Measures time of execution of code block given as a parameter in nanoseconds.
+    *
+    * @param block of code to be executed
+    * @tparam R type of the variable that execution of block returns
+    * @return execution time in nanoseconds
+    */
   def time[R](block: => R): Long = {
     val t0 = System.nanoTime()
     block
