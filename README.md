@@ -1,4 +1,4 @@
-# Datarino_BashScraper
+# BashScraper
 
 Libraries used
 ====================
