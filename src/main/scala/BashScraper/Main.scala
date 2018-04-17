@@ -24,9 +24,8 @@ object Main extends App {
   if (args.length == 0) {
     println("No parameter given")
   }
-  val numberOfPages = 3//args(0).toInt
+  val numberOfPages = args(0).toInt
   val browser = JsoupBrowser()
-//  val numberOfPages = 5
   var postCounter = 0
   var postParseTimes = ListBuffer[Long]()
   var pageParseTimes = ListBuffer[Long]()
